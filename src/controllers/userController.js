@@ -17,7 +17,7 @@ const createUser = async function (req, res) {
         } 
         else{
             let arr = ['Mr','Miss','Mrs']
-            if(!(arr.indexOf(title) !== -1)){
+            if(!(arr.indexOf(title.trim()) !== -1)){
                 return res.status(400).send({ status: false, msg: "Invalid enum Value" })
             }
         }
@@ -62,7 +62,7 @@ const createUser = async function (req, res) {
         }
 
         let saveData = await userModel.create(data)
-        return res.status(201).send({ status: false, msg: "User Created Successfully", data: saveData })
+        return res.status(201).send({ status: true, msg: "User Created Successfully", data: saveData })
     }
     catch (err) {
         res.status(500).send({ status: false, msg: err.message })
@@ -97,7 +97,7 @@ const userLogin = async function (req, res) {
 
         let findUser = await userModel.findOne({ email: data1, password: data2 })
         if (!findUser) {
-           return res.status(404).send({ status: false, msg: "Invalid Credentials" })
+           return res.status(400).send({ status: false, msg: "Invalid Credentials" })
         } else {
             let geneToken = jwt.sign({
                 userId: findUser._id,
