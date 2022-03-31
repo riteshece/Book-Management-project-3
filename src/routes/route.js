@@ -9,7 +9,7 @@ const authentication = require("../middleWare/auth")
 router.post("/register", userController.createUser);
 router.post("/login", userController.userLogin)
 
-router.post("/books", bookController.createBook)
+router.post("/books",authentication.authentication, bookController.createBook)
 router.get("/books",authentication.authentication, bookController.getBooks)
 router.get("/books/:bookId",authentication.authentication, bookController.getBooksById)
 router.put("/books/:bookId",authentication.authentication, bookController.updateBooks)

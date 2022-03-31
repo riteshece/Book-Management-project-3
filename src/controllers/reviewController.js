@@ -93,8 +93,8 @@ const deleteReviews = async function (req, res) {
         }
 
         else {
-            let checkReview = await reviewModel.findOne({ _id: reviewId, isDeleted: true })
-            if (checkReview) {
+            let checkReview = await reviewModel.findOne({ _id: reviewId, isDeleted: false })
+            if (!checkReview) {
                 return res.status(404).send({ status: false, msg: "No review is Exist or review is already Deleted" })
             }
             else {

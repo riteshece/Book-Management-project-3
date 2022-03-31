@@ -1,6 +1,5 @@
 const userModel = require("../models/userModel");
 const jwt = require("jsonwebtoken");
-const { find } = require("../models/userModel");
 
 
 const createUser = async function (req, res) {
@@ -15,6 +14,12 @@ const createUser = async function (req, res) {
         }
         if (!title) {
             return res.status(400).send({ status: false, msg: "No Title is Passed" })
+        } 
+        else{
+            let arr = ['Mr','Miss','Mrs']
+            if(!(arr.indexOf(title) !== -1)){
+                return res.status(400).send({ status: false, msg: "Invalid enum Value" })
+            }
         }
         if (!name) {
             return res.status(400).send({ status: false, msg: "Name is required" })
@@ -33,15 +38,15 @@ const createUser = async function (req, res) {
         }
 
         //format validation
-        if (!(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone))) {
+        if (!(/^(?:(?:\+|0{0,2})91(\s*[\-]\s*)?|[0]?)?[789]\d{9}$/.test(phone.trim()))) {
             return res.status(400).send({ status: false, msg: "Not a valid Number provide valid phone Number" })
         }
 
-        if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(email))) {
+        if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(email.trim()))) {
             return res.status(400).send({ status: false, msg: "Not a valid Email provide valid email" })
         }
 
-        if (!(password.length > 8 && password.length < 15)) {
+        if (!(password.trim().length > 8 && password.trim().length < 15)) {
             return res.status(400).send({ status: false, msg: "Invalid Password" })
         }
 
@@ -83,10 +88,10 @@ const userLogin = async function (req, res) {
         }
 
         //format validaion
-        if (!(/^\w+([\.-]?\w+)@\w+([\. -]?\w+)(\.\w{2,3})+$/.test(data1))) {
+        if (!(/^\w+([\.-]?\w+)@\w+([\. -]?\w+)(\.\w{2,3})+$/.test(data1.trim()))) {
             return res.status(400).send({ status: false, msg: "Not a valid Email provide valid email" })
         }
-        if (!(data2.length > 8 && data2.length < 15)) {
+        if (!(data2.trim().length > 8 && data2.trim().length < 15)) {
             return res.status(400).send({ status: false, msg: "Invalid Password" })
         }
 

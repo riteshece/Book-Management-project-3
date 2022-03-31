@@ -54,9 +54,9 @@ const createBook = async function (req, res) {
             return res.status(404).send({ status: false, msg: "User is Not Found" })
         }
 
-        // if (data.userId !== IdofDecodedToken) {
-        //     return res.status(401).send({ status: false, msg: "Unauthorized Access! User Does Not Matched" })
-        // }
+        if (data.userId !== IdofDecodedToken) {
+            return res.status(401).send({ status: false, msg: "Unauthorized Access! User Does Not Matched" })
+        }
         let saveData = await bookModel.create(data)
         return res.status(201).send({ status: true, msg: "book is created", data: saveData })
 
