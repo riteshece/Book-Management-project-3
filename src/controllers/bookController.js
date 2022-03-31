@@ -44,9 +44,15 @@ const createBook = async function (req, res) {
             return res.status(400).send({ status: false, msg: "ISBN is already present" })
         }
 
+
+
         //date format validation
         if (!(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/.test(releasedAt))) {
             return res.status(400).send({ status: false, msg: "Not a valid Format" })
+        }
+
+        if((ISBN.trim().length <= 12 )){
+            return res.status(400).send({ status: false, msg: "Not a valid ISBN" })
         }
 
         let searchUserId = await userModel.findById(userId)
@@ -122,6 +128,8 @@ const updateBooks = async function (req, res) {
     try {
         let bookId = req.params.bookId;
         let data = req.body;
+        let title = req.body.title;
+        let ISBN = req.body.ISBN;
         const IdofDecodedToken = req.userId
 
         if (Object.keys(data).length == 0) {
@@ -140,7 +148,22 @@ const updateBooks = async function (req, res) {
             let searchBookId = await bookModel.findOne({ _id: bookId, isDeleted: true })
             if (searchBookId) {
                 return res.status(400).send({ status: false, msg: "Book is Already Deleted" })
+
             } else {
+                //update validation
+                let checktitle = await bookModel.findOne({title:title})
+                if(checktitle){
+                    return res.status(400).send({ status: false, msg: "title is already Present" })
+                }
+                let checkISBN = await bookModel.findOne({ISBN:ISBN})
+                if(checkISBN){
+                    return res.status(400).send({ status: false, msg: "ISBN is already Present" })
+                } 
+                if((ISBN.trim().length <= 12 )){
+                    return res.status(400).send({ status: false, msg: "Not a valid ISBN" })
+                }
+
+                //updating Book
                 let updateBook = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { $set: data, }, { new: true })
                 return res.status(200).send({ status: true, msg: "Book Updated Successfully", data: updateBook })
             }
