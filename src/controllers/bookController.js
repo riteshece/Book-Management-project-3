@@ -132,7 +132,7 @@ const getBooksById = async function (req, res) {
             return res.status(404).send({ status: false, msg: "No Book is Present" })
 
         } else {
-            let reviewsData = await reviewModel.find({ _id: bookId, isDeleted: false }).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewdAt: 1, rating: 1, review: 1 })
+            let reviewsData = await reviewModel.find({ bookId: bookId, isDeleted: false }).select({ _id: 1, bookId: 1, reviewedBy: 1, reviewdAt: 1, rating: 1, review: 1 })
 
             let { title, excerpt, ISBN, userId, category, subcategory, reviews, releasedAt } = searchBookId
 
