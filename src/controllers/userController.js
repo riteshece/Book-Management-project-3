@@ -95,10 +95,15 @@ const userLogin = async function (req, res) {
         }
 
         //format validaion
-        if (!(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-z\-0-9]+\.)+[a-z]{2,}))$/.test(data1.trim()))) {
+        if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/.test(data1.trim()))) {
             return res.status(400).send({ status: false, msg: "Not a valid Email provide valid email" })
         }
-        if (!(data2.trim().length > 8 && data2.trim().length < 15)) {
+
+        if (!(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-z\-0-9]+\.)+[a-z]{2,}))$/.test(data1.trim()))) {
+            return res.status(400).send({ status: false, msg: "Please enter the credentials in lowercase" })
+        }
+        
+        if (!(data2.trim().length > 8 && data2.trim().length < 16)) {
             return res.status(400).send({ status: false, msg: "Invalid Password" })
         }
 

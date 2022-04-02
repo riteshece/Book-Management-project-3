@@ -23,13 +23,13 @@ const createReview = async function (req, res) {
         if (!(mongoose.Types.ObjectId.isValid(bookId))) {
             return res.status(400).send({ status: false, msg: "Not a valid bookId" })
         }
+        if(!(mongoose.Types.ObjectId.isValid(data.bookId))){
+            return res.status(400).send({ status: false, msg: "Not a valid bookId" })
+        }
 
         //mandatory validation
         if (!data.bookId) {
             return res.status(400).send({ status: false, msg: "BookId is required" })
-        }
-        if (!type(reviewedBy)) {
-            return res.status(400).send({ status: false, msg: "Reviewer name is required" })
         }
         if (!type(rating)) {
             return res.status(400).send({ status: false, msg: "Rating is required" })
@@ -51,7 +51,7 @@ const createReview = async function (req, res) {
         //creating review
         let saveReview = await reviewModel.create(data) 
         if (saveReview) {
-            let updateBooks = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, { reviews: reviews + 1 })
+            let updateBooks = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, {$inc:{ reviews:1 }})
         }
 
         //getting all reviews 
@@ -164,7 +164,7 @@ const deleteReviews = async function (req, res) {
             else {
                 let deleteReview = await reviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false }, { isDeleted: true, deletedAt: Date() }, { new: true })
                 if (deleteReview) {
-                    let deleteBook = await bookModel.findOneAndUpdate({ _id: bookId }, { reviews: reviews - 1 })
+                    let deleteBook = await bookModel.findOneAndUpdate({ _id: bookId }, {$inc:{ reviews:-1 }})
                 }
                 return res.status(200).send({ status: true, msg: "Review Deleted Successfully", data: deleteReview })
             }
