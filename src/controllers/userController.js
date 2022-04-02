@@ -2,6 +2,13 @@ const userModel = require("../models/userModel");
 const jwt = require("jsonwebtoken");
 
 
+const type = function(value){
+    if(typeof value === "undefined" || value === null) return false
+    if(typeof value === "string" && value.trim().length === 0) return false
+    return true
+}
+
+
 const createUser = async function (req, res) {
     try {
         let data = req.body;
@@ -9,10 +16,10 @@ const createUser = async function (req, res) {
         const { title, name, phone, email, password, address } = data
 
         //Mandatory validation
-        if (!data) {
+        if (Object.keys(data) == 0 ) {
             return res.status(400).send({ status: false, msg: "No Parameter Passed" })
         }
-        if (!title) {
+        if (!type(title)) {
             return res.status(400).send({ status: false, msg: "No Title is Passed" })
         } 
         else{
@@ -21,19 +28,19 @@ const createUser = async function (req, res) {
                 return res.status(400).send({ status: false, msg: "Invalid enum Value" })
             }
         }
-        if (!name) {
+        if (!type(name)) {
             return res.status(400).send({ status: false, msg: "Name is required" })
         }
-        if (!phone) {
+        if (!type(phone)) {
             return res.status(400).send({ status: false, msg: "phone is required" })
         }
-        if (!email) {
+        if (!type(email)) {
             return res.status(400).send({ status: false, msg: "email is required" })
         }
-        if (!password) {
+        if (!type(password)) {
             return res.status(400).send({ status: false, msg: "password is required" })
         }
-        if (!address) {
+        if (!type(address)) {
             return res.status(400).send({ status: false, msg: "address is required" })
         }
 
@@ -77,18 +84,18 @@ const userLogin = async function (req, res) {
         let data2 = req.body.password;
         
         //mandatory validation
-        if(Object.keys(data).length == 0){
+        if(Object.keys(data) == 0){
             return res.status(400).send({ status: false, msg: "No Parameters Passed in requestBody" })
         }
-        if (!data1) {
+        if (!type(data1)) {
            return res.status(400).send({ status: false, msg: "email is required" })
         }
-        if (!data2) {
+        if (!type(data2)) {
            return res.status(400).send({ status: false, msg: "password is required" })
         }
 
         //format validaion
-        if (!(/^\w+([\.-]?\w+)@\w+([\. -]?\w+)(\.\w{2,3})+$/.test(data1.trim()))) {
+        if (!(/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-z\-0-9]+\.)+[a-z]{2,}))$/.test(data1.trim()))) {
             return res.status(400).send({ status: false, msg: "Not a valid Email provide valid email" })
         }
         if (!(data2.trim().length > 8 && data2.trim().length < 15)) {
@@ -101,9 +108,7 @@ const userLogin = async function (req, res) {
         } else {
             let geneToken = jwt.sign({
                 userId: findUser._id,
-                iat: Math.floor(Date.now() / 1000),
-                exp: Math.floor(Date.now() / 1000) + 30 * 60
-            }, "group26");
+            }, "group26",{expiresIn : "30m"});
            return res.status(201).send({ status: true, msg: "token Created Successfully", Token: geneToken })
         }
     }

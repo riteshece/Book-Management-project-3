@@ -4,6 +4,12 @@ const userModel = require("../models/userModel");
 const mongoose = require("mongoose")
 
 
+const type = function(value){
+    if(typeof value === "undefined" || value === null) return false
+    if(typeof value === "string" && value.trim().length === 0) return false
+    return true
+}
+
 
 const createBook = async function (req, res) {
     try {
@@ -14,28 +20,28 @@ const createBook = async function (req, res) {
         const { title, excerpt, ISBN, userId, category, subcategory, releasedAt } = data
 
         //mandatory validation
-        if (!data) {
+        if (Object.keys(data) == 0) {
             return res.status(400).send({ status: false, msg: "No Parameter Passed in RequestBody" })
         }
-        if (!title) {
+        if (!type(title)) {
             return res.status(400).send({ status: false, msg: "title is mandatory, provide title" })
         }
-        if (!excerpt) {
+        if (!type(excerpt)) {
             return res.status(400).send({ status: false, msg: "excerpt is mandatory, provide excerpt" })
         }
-        if (!userId) {
+        if (!type(userId)) {
             return res.status(400).send({ status: false, msg: "userId is mandatory, provide userId" })
         }
-        if (!ISBN) {
+        if (!type(ISBN)) {
             return res.status(400).send({ status: false, msg: "ISBN is mandatory, provide ISBN" })
         }
-        if (!category) {
+        if (!type(category)) {
             return res.status(400).send({ status: false, msg: "category is mandatory, provide category" })
         }
-        if (!subcategory) {
+        if (!type(subcategory)) {
             return res.status(400).send({ status: false, msg: "subcategory is mandatory, provide subcategory" })
         }
-        if (!releasedAt) {
+        if (!type(releasedAt)) {
             return res.status(400).send({ status: false, msg: "releasedAt is mandatory, provide releasedAt" })
         }
 
@@ -50,17 +56,20 @@ const createBook = async function (req, res) {
             return res.status(400).send({ status: false, msg: "ISBN is already present" })
         }
 
-
+         const removespace = releasedAt.replace(/\s/g, '');
 
         //date format validation
-        if (!(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/.test(releasedAt))) {
+        if (!(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/.test(removespace))) {
             return res.status(400).send({ status: false, msg: "ReleasedAt is Not a valid Format" })
         }
+        data.releasedAt=removespace; //
+
+
         if ((ISBN.trim().length <= 12)) {
             return res.status(400).send({ status: false, msg: "Not a valid ISBN" })
         }
-        isValid = mongoose.Types.ObjectId.isValid(userId)
-        if (!isValid) {
+    
+        if (!(mongoose.Types.ObjectId.isValid(userId))) {
             return res.status(400).send({ status: false, msg: "Not a valid userId" })
         }
 
@@ -68,10 +77,11 @@ const createBook = async function (req, res) {
         if (!searchUserId) {
             return res.status(404).send({ status: false, msg: "User is Not Found" })
         }
-
+        // checkig authorization
         if (data.userId !== IdofDecodedToken) {
             return res.status(401).send({ status: false, msg: "Unauthorized Access! User Does Not Matched" })
         }
+        
         let saveData = await bookModel.create(data)
         return res.status(201).send({ status: true, msg: "book is created", data: saveData })
 
@@ -94,7 +104,7 @@ const getBooks = async function (req, res) {
             return res.status(400).send({ status: false, msg: "No Parameter Passed in RequestBody" })
         }
 
-        let findBooks = await bookModel.find(data1).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, reviews: 1, releasedAt: 1 }).sort({ "title": 1 })
+        let findBooks = await bookModel.find(data1).select({ _id: 1, title: 1, excerpt: 1, userId: 1, category: 1, reviews: 1, releasedAt: 1 }).sort({title:1})
 
         if (Object.keys(findBooks).length == 0) {
             return res.status(404).send({ status: false, msg: "No Books is Found" })
@@ -113,8 +123,7 @@ const getBooksById = async function (req, res) {
     try {
         let bookId = req.params.bookId;
 
-        isValid = mongoose.Types.ObjectId.isValid(bookId)
-        if (!isValid) {
+        if (!(mongoose.Types.ObjectId.isValid(bookId))) {
             return res.status(400).send({ status: false, msg: "Not a valid bookId" })
         }
 
@@ -142,19 +151,41 @@ const updateBooks = async function (req, res) {
     try {
         let bookId = req.params.bookId;
         let data = req.body;
-        let title = req.body.title;
-        let ISBN = req.body.ISBN;
+        
+        let {title,ISBN,releasedAt,excerpt} = data
         const IdofDecodedToken = req.userId
 
         if (Object.keys(data).length == 0) {
             return res.status(400).send({ status: false, msg: "No Parameters Passed In Request" })
         }
-
-        isValid = mongoose.Types.ObjectId.isValid(bookId)
-        if (!isValid) {
+        //bookId validation
+        if (!(mongoose.Types.ObjectId.isValid(bookId))) {
             return res.status(400).send({ status: false, msg: "Not a valid bookId" })
         }
 
+        //Mandotaroy validation
+        if (!type(title)) {
+            return res.status(400).send({ status: false, msg: "title is mandatory, provide title" })
+        }
+        if (!type(excerpt)) {
+            return res.status(400).send({ status: false, msg: "excerpt is mandatory, provide excerpt" })
+        }
+        if (!type(ISBN)) {
+            return res.status(400).send({ status: false, msg: "ISBN is mandatory, provide ISBN" })
+        }
+        if (!type(releasedAt)) {
+            return res.status(400).send({ status: false, msg: "releasedAt is mandatory, provide releasedAt" })
+        }
+
+        
+        //date format validation
+        if (!(/^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2][0-9]|3[0-1])$/.test(releasedAt))) {
+            return res.status(400).send({ status: false, msg: "ReleasedAt is Not a valid Format" })
+        }
+        if ((ISBN.trim().length <= 12)) {
+            return res.status(400).send({ status: false, msg: "Not a valid ISBN" })
+        }
+        
         let findData = await bookModel.findById(bookId)
         if (!findData) {
             return res.status(404).send({ status: false, msg: "No book is Present" })
@@ -199,8 +230,7 @@ const deleteBooks = async function (req, res) {
         let bookId = req.params.bookId;
         const IdofDecodedToken = req.userId
 
-        isValid = mongoose.Types.ObjectId.isValid(bookId)
-        if (!isValid) {
+        if (!(mongoose.Types.ObjectId.isValid(bookId))) {
             return res.status(400).send({ status: false, msg: "Not a valid bookId" })
         }
 
