@@ -31,6 +31,9 @@ const createReview = async function (req, res) {
         if (!data.bookId) {
             return res.status(400).send({ status: false, msg: "BookId is required" })
         }
+        if(bookId !== data.bookId){
+            return res.status(400).send({ status: false, msg: "BookId Not Matched" })
+        }
         if (!type(rating)) {
             return res.status(400).send({ status: false, msg: "Rating is required" })
         }
@@ -51,7 +54,7 @@ const createReview = async function (req, res) {
         //creating review
         let saveReview = await reviewModel.create(data) 
         if (saveReview) {
-            let updateBooks = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, {$inc:{ reviews:1 }})
+            let updateBooks = await bookModel.findOneAndUpdate({ _id: bookId, isDeleted: false }, {$inc:{ reviews:1 }},{new:true})
         }
 
         //getting all reviews 
@@ -164,7 +167,7 @@ const deleteReviews = async function (req, res) {
             else {
                 let deleteReview = await reviewModel.findOneAndUpdate({ _id: reviewId, isDeleted: false }, { isDeleted: true, deletedAt: Date() }, { new: true })
                 if (deleteReview) {
-                    let deleteBook = await bookModel.findOneAndUpdate({ _id: bookId }, {$inc:{ reviews:-1 }})
+                    let deleteBook = await bookModel.findOneAndUpdate({ _id: bookId }, {$inc:{ reviews:-1 }},{new:true})
                 }
                 return res.status(200).send({ status: true, msg: "Review Deleted Successfully", data: deleteReview })
             }
